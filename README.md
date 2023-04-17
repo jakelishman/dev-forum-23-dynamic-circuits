@@ -28,11 +28,11 @@ Top-level contents:
 
 ## Setup
 
-Most of this session will use only release versions of Qiskit Terra (version 0.23.3), Qiskit Aer (version 0.12.0) and the IBM Provider (version 0.5.2).
+Most of this session will use only release versions of Qiskit Terra (version 0.23.3) and the IBM Provider (version 0.5.2).
 You can install these with
 
 ```text
-pip install qiskit-terra qiskit-aer qiskit-ibm-provider
+pip install qiskit-terra qiskit-ibm-provider
 ```
 
 You should feel free to use whatever developer environment you would usually use to interact with Qiskit.
@@ -42,9 +42,9 @@ We are interested in pain points associated with any of these, though will likel
 
 ### Advanced users' setup
 
-** :bangbang: This will not work until Terra 0.24.0rc1 is released, scheduled on 2023-04-20 :bangbang: **
+:bangbang: **This will not work until Terra 0.24.0rc1 is released, scheduled for 2023-04-20.** :bangbang:
 
-If you are familiar enough with the stack to try out use of the new `switch` operation, you will need to use the prerelease version of Qiskit Terra, 0.24.0rc1.
+If you are familiar enough with the stack to try out use of the new `switch` operation, you will need to use the prerelease version of Qiskit Terra, 0.24.0rc1 (see task 5 below).
 You will likely want to do this in a separate virtual environment.
 The prerelease of Qiskit Terra can be installed with
 ```text
@@ -86,6 +86,12 @@ bell.measure([0, 1], [0, 1])
 
 You should be able to print out the counts from the backend run, which ideally should be mostly an even split between `'00'` and `'11`'.
 
+<!--
+What we're interested in:
+
+- mostly this is just a test that people know how to access our hardware _at all_, so we know what stage everyone in the room is at.
+-->
+
 
 ### Task #2: Hello, dynamic circuits
 
@@ -103,6 +109,85 @@ When executing the circuit using `backend.run`, you must pass the keyword argume
 5. Execute the circuit on the backend and retrieve the counts.
 
 You should find that the results `00` and `01` happen with equal probability and everything else happens with little-to-no probability.
+
+<!--
+What we're interested in:
+
+- debugging: how do users go about this?  Suggest circuit visualisations, OQ3 exporter.
+- how do users find the builder interface to use?
+-->
+
+
+### Task #3: If-then-else constructs
+
+*[Link to hints and solutions.](#Solutions-to-3-If-then-else constructs)*
+
+Notes to implement:
+- some task that logically wants an `else` clause on the `if` statement.
+- ideally the logic should want to condition multiple statements, so `c_if` is totally inappropriate
+
+<!--
+What we're interested in:
+
+- how well do users find the `else` branch, and how easy/intuitive is it for them?
+- do they understand the upgrade path from / reasons not to use `c_if` now (if they knew it before)?
+- do users understand the current limitations on conditions in Qiskit / do they have suggestions for how to improve them?
+-->
+
+
+### Task #4: Improving quality of complex circuits
+
+*[Link to hints and solutions.](#Solutions-to-4-Improving-quality-of-complex-circuits)*
+
+Notes to implement:
+- circuit should not have a perfect mapping to hardware coupling - routing 100% required
+- first make a circuit that's complex and will have poor results
+- looking to improve by:
+  - choosing better initial qubits (if VF2Post doesn't do this for us)
+  - adding dynamical decoupling
+- ideally, the classical component could be reduced to a single classical jump iff implemented with a `switch`, to lead into task #5
+
+What we want to know:
+- do people have any insight into what the transpiler might be doing that's non-optimal (in order to know what they could improve)
+- do people know how to access dynamic-circuits enable dynamic decoupling
+- do users know how to find issues with 
+
+
+### Task #5: The `switch` statement
+
+*[Link to hints and solutions.](#Solutions-to-5-The-switch-statement)*
+
+To achieve this task with Qiskit alone, you will need to use [the advanced setup at the top of this document](#Advanced-users-setup). 
+In particular, you will need the pre-release of Qiskit Terra 0.24.0 and the helper functions provided by this repository.
+If you are familiar with using the direct submission of OpenQASM 3 strings to IBM hardware, you can use these methods too, though we would particularly appreciate feedback on the new `switch` support coming in Qiskit Terra 0.24.0.
+
+Notes to implement:
+- a circuit that needs only a single classical lookup, rather than several separate syncs
+- possible example: create some `000 + 001 + 010 + 011 + ...` state, then use a `switch` to reverse the bitstring?
+- will need to use `helpers.add_switch_support(backend)` helper defined in `lib/helpers.py` because IBM backends won't have support yet.
+
+What we want to know:
+- how difficult do people find constructing `switch`?
+- how do they react on errors?
+- how do they debug circuit on error?
+
+
+### Task #6: Bitwise manipulations
+
+*[Link to hints and solutions.](#Solutions-to-6-Bitwise-manipulations)*
+
+This task goes beyond Qiskit's current capabilities.
+You will need to use the direct submission of OpenQASM 3 strings to the IBM backends.
+
+Notes to implement:
+- brief introduction on how to submit raw strings
+- some task that logically wants to manipulate the bits in a runtime condition for some more complex logic (e.g. `a && b` conditions)
+
+What we're interested in:
+- how people mix-and-match Qiskit and raw OQ3 strings when dealing with problems beyond Qiskit's current capabilities
+- how people might try and use techniques to improve output quality in such situations
+- interface design ideas from people about how we could implement this in Qiskit
+
 
 
 ## Hints and solutions
@@ -201,3 +286,23 @@ print(f"Job id: {job.job_id()}")
 result = job.result()
 print(result.get_counts())
 ```
+
+
+### Solutions to #3: If-then-else constructs
+
+*[Link back to task.](#Task-3-If-then-else constructs)*
+
+
+### Solutions to #4: Improving quality of complex circuits
+
+*[Link back to task.](#Task-4-Improving-quality-of-complex-circuits)*
+
+
+### Solutions to #5: The `switch` statement
+
+*[Link back to task.](#Task-5-The-switch-statement)*
+
+
+### Solutions to #6: Bitwise manipulations
+
+*[Link back to task.](#Task-6-Bitwise-manipulations)*
