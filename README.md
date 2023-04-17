@@ -19,6 +19,12 @@ For reference, these are links to public documentation for:
 - [the current IBM Provider](https://qiskit.org/ecosystem/ibm-provider/)
 - [using dynamic circuits with IBM hardware](https://quantum-computing.ibm.com/services/resources/docs/resources/manage/systems/dynamic-circuits/introduction)
 
+Top-level contents:
+
+- [Setup](#Setup)
+- [Tasks](#Tasks)
+- [Hints and solutions](#Hints-and-solutions)
+
 
 ## Setup
 
@@ -56,9 +62,13 @@ This will make a module called `helpers` available; this guide will cover detail
 
 ## Tasks
 
-### #1: Accessing dynamic-circuits backends
+At all stages throughout these tasks, please feel free to use whatever debugging tools you would usually use (whether external or built into Qiskit).
+This includes circuit visualisations and exporting the circuit to other forms.
+We are also interested in problems with using any of these tools.
 
-*[Link to hints and solutions.](#Solutions-to-Accessing-dynamic-circuits-backends)*
+### Task #1: Accessing dynamic-circuits backends
+
+*[Link to hints and solutions.](#Solutions-to-1-Accessing-dynamic-circuits-backends)*
 
 We have a reservation on the machine `ibm_TODO` for the duration of this session.
 Use the `qiskit-ibm-provider` using the `instance` (hub/group/project) credentials `"hub_TODO/group_TODO/project_TODO"` to access this backend.
@@ -74,12 +84,25 @@ bell.cx(0, 1)
 bell.measure([0, 1], [0, 1])
 ```
 
-
-### #2: Hello, dynamic circuits
-
-*[Link to hints and solutions.](#Solutions-to-Hello-dynamic-circuits)*
+You should be able to print out the counts from the backend run, which ideally should be mostly an even split between `'00'` and `'11`'.
 
 
+### Task #2: Hello, dynamic circuits
+
+*[Link to hints and solutions.](#Solutions-to-2-Hello-dynamic-circuits)*
+
+We will now run our first circuit requiring the new dynamic-circuits capabilities.
+We will create a circuit that uses a mid-circuit measurement and feed-forward control to reset a qubit.
+
+When executing the circuit using `backend.run`, you must pass the keyword argument `dynamic=True`.
+
+1. Create a circuit with one qubit and two clbits
+2. Do a Hadamard gate on the qubit, then measure it into clbit 0.
+3. If the measurement result is 1, apply an X gate on the qubit.
+4. Measure the qubit again, into clbit 1.
+5. Execute the circuit on the backend and retrieve the counts.
+
+You should find that the results `00` and `01` happen with equal probability and everything else happens with little-to-no probability.
 
 
 ## Hints and solutions
@@ -87,7 +110,9 @@ bell.measure([0, 1], [0, 1])
 This section continues some hints and possible solutions for the tasks given above.
 We are interested in how you go about solving problems as they arise, and how able you are to troubleshoot using our existing documentation, so please try doing whatever you'd normally do first (and note what problems you encounter!), and then use these as a secondary resort.
 
-### Solutions to Accessing dynamic-circuits backends
+### Solutions to #1: Accessing dynamic-circuits backends
+
+*[Link back to task.](#Task-1-Accessing-dynamic-circuits-backends)*
 
 #### Accessing the backend
 
@@ -135,6 +160,7 @@ bell.measure([0, 1], [0, 1])
 
 transpiled = transpile(bell, backend)
 job = backend.run(transpiled)
+print(f"Job id: {job.job_id()}")
 result = job.result()
 counts = result.get_counts()
 
@@ -142,4 +168,36 @@ print(counts)
 ```
 
 
-### Solutions to Hello dynamic circuits
+### Solutions to #2: Hello dynamic circuits
+
+*[Link back to task.](#Task-2-Hello-dynamic-circuits)*
+
+#### Creation of the circuit
+
+The conditional logic can be done using either the legacy `.c_if` path, or the modern `with qc.if_test` builder interface.
+We strongly recommend using the `with qc.if_test` form for everything; `.c_if` is due to be deprecated, can only handle conditioning single instructions (not blocks), and cannot represent an `else` condition.
+
+```python
+from qiskit import QuantumCircuit
+
+qc = QuantumCircuit(1, 2)
+qc.h(0)
+qc.measure(0, 0)
+with qc.if_test((0, True)):
+    qc.x(0)
+qc.measure(0, 1)
+```
+
+
+#### Executing the circuit on hardware
+
+You _must_ remember to pass `dynamic=True` to `backend.run` when trying to execute a dynamic circuit.
+
+```python
+transpiled = transpile(qc, backend)
+
+job = backend.run(transpiled, dynamic=True)
+print(f"Job id: {job.job_id()}")
+result = job.result()
+print(result.get_counts())
+```
