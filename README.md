@@ -70,8 +70,8 @@ We are also interested in problems with using any of these tools.
 
 *[Link to hints and solutions.](#Solutions-to-1-Accessing-dynamic-circuits-backends)*
 
-We have a reservation on the machine `ibm_TODO` for the duration of this session.
-Use the `qiskit-ibm-provider` using the `instance` (hub/group/project) credentials `"hub_TODO/group_TODO/project_TODO"` to access this backend.
+We have a reservation on the machine `ibmq_kolkata` for the duration of this session.
+Use the `qiskit-ibm-provider` using the `instance` (hub/group/project) credentials `ibm-q-community/dev-forum-23/main` to access this backend.
 
 Test that the backend works for regular (non-dynamic) circuits by creating a Bell-state creation circuit and measuring both qubits, running it on the device, and retrieving the counts.
 One possible Bell circuit looks like this:
@@ -202,14 +202,14 @@ We are interested in how you go about solving problems as they arise, and how ab
 #### Accessing the backend
 
 You must be using the package `qiskit-ibm-provider` and _not_ the now-deprecated `qiskit-ibmq-provider` (note `-ibm-` vs `-ibmq-`).
-If you have saved credentials that grant you access to a dynamic-circuits machines other than `ibm_TODO`, you may use those instead, but we've got a reservation on this one.
+If you have saved credentials that grant you access to a dynamic-circuits machines other than `ibmq_kolkata`, you may use those instead, but we've got a reservation on this one.
 
 ```python
 from qiskit_ibm_provider import IBMProvider
 
-instance = "hub_TODO/group_TODO/project_TODO"
+instance = "ibm-q-community/dev-forum-23/main"
 provider = IBMProvider(instance=instance)
-backend = provider.get_backend("ibm_TODO")
+backend = provider.get_backend("ibmq_kolkata")
 ```
 
 #### Preparing a circuit to run on a backend
@@ -234,9 +234,9 @@ The complete code to run the Bell-circuit example is:
 from qiskit import QuantumCircuit, transpile
 from qiskit_ibm_provider import IBMProvider
 
-instance = "hub_TODO/group_TODO/project_TODO"
+instance = "ibm-q-community/dev-forum-23/main"
 provider = IBMProvider(instance=instance)
-backend = provider.get_backend("ibm_TODO")
+backend = provider.get_backend("ibmq_kolkata")
 
 bell = QuantumCircuit(2, 2)
 bell.h(0)
