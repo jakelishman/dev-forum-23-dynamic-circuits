@@ -297,17 +297,146 @@ result = job.result()
 print(result.get_counts())
 ```
 
+#### Inspecting the transpiled circuit
 
+```python
+print(transpiled.layout)
+```
+
+```python
+print(backend.target.qubit_properties[0])
+```
+
+```python
+print(backend.target['sx'][(0,)])
+```
+
+```python
+print(qiskit.qasm3.dumps(tqc,
+                         includes=[],
+                         disable_constants=True,
+                         basis_gates=backend.configuration().basis_gates))
+```
 ### Solutions to #3: If-then-else constructs
 
 *[Link back to task.](#Task-3-If-then-else constructs)*
 
+For a bit-flip repitition code, with a randomly introduced error:
 
+```python
+qr_data = qk.QuantumRegister(3, 'data')
+qr_anc = qk.QuantumRegister(2, 'ancilla')
+
+cr_rand = qk.ClassicalRegister(2, 'rand')
+cr_anc = qk.ClassicalRegister(2, 'anc')
+cr_data = qk.ClassicalRegister(3, 'out')
+
+qc = qk.QuantumCircuit(qr_data, qr_anc, cr_rand, cr_anc, cr_data)
+
+qc.h(qr_anc)
+qc.measure(qr_anc, cr_rand)
+
+qc.reset(qr_anc)
+
+qc.barrier()
+
+qc.h(qr_data[0])
+qc.cx(qr_data[0], qr_data[1])
+qc.cx(qr_data[0], qr_data[2])
+
+# Can replace the above stanza with the below to help
+# the transpiler find a good layout, but if enabled,
+# gives a backend compilation error.
+# qc.h(qr_data[0])
+# qc.cx(qr_data[0], qr_anc[0])
+# qc.cx(qr_anc[0], qr_data[1])
+# qc.cx(qr_data[1], qr_anc[0])
+# qc.cx(qr_data[0], qr_anc[1])
+# qc.cx(qr_anc[1], qr_data[2])
+# qc.cx(qr_data[2], qr_anc[1])
+
+with qc.if_test((cr_rand, 0)):
+    qc.x(qr_data[0])
+with qc.if_test((cr_rand, 1)):
+    qc.x(qr_data[1])
+with qc.if_test((cr_rand, 2)):
+    qc.x(qr_data[2])
+with qc.if_test((cr_rand, 3)):
+    qc.id(qr_data)
+
+# Alternative to above. Maybe shorter.
+# Had raised an error on qasm3.dumps, but can't reproduce now.
+#with qc.if_test((cr_rand, 0)) as else_:
+#    qc.x(qr_data[0])
+#with else_:
+#    with qc.if_test((cr_rand, 1)) as else_:
+#        qc.x(qr_data[1])
+#    with else_:
+#        with qc.if_test((cr_rand, 2)) as else_:
+#            qc.x(qr_data[2])
+#        with else_:
+#            qc.id(qr_data)
+
+qc.cx(qr_data[0], qr_anc[0])
+qc.cx(qr_data[1], qr_anc[0])
+qc.cx(qr_data[0], qr_anc[1])
+qc.cx(qr_data[2], qr_anc[1])
+
+qc.measure(qr_anc, cr_anc)
+
+with qc.if_test((cr_anc, 3)):
+    qc.x(qr_data[0])
+with qc.if_test((cr_anc, 1)):
+    qc.x(qr_data[1])
+with qc.if_test((cr_anc, 2)):
+    qc.x(qr_data[2])
+
+qc.measure(qr_data, cr_data)
+```
+
+```python
+from qiskit.result import marginal_counts
+marginal_counts(
+   job.result(),
+   [4,5,6],
+   format_marginal=True
+).get_counts()
+```
 ### Solutions to #4: Improving quality of complex circuits
 
 *[Link back to task.](#Task-4-Improving-quality-of-complex-circuits)*
 
+```python
+# From https://qiskit.org/ecosystem/ibm-provider/stubs/qiskit_ibm_provider.transpiler.passes.scheduling.html#module-qiskit_ibm_provider.transpiler.passes.scheduling
+from qiskit.transpiler.passmanager import PassManager
+from qiskit.circuit.library import XGate
 
+from qiskit_ibm_provider.transpiler.passes.scheduling import DynamicCircuitInstructionDurations
+from qiskit_ibm_provider.transpiler.passes.scheduling import ALAPScheduleAnalysis
+from qiskit_ibm_provider.transpiler.passes.scheduling import PadDynamicalDecoupling
+
+# Use this duration class to get appropriate durations for dynamic
+# circuit backend scheduling
+durations = DynamicCircuitInstructionDurations.from_backend(nairobi)
+# Configure the as-late-as-possible scheduling pass
+dd_sequence = [XGate(), XGate()]
+pm = PassManager(
+    [
+        ALAPScheduleAnalysis(durations),
+        PadDynamicalDecoupling(durations, dd_sequence),
+    ]
+)
+
+scheuled = pm.run(transpiled_circuit)
+# qss_compiler.compile.QSSCompilationFailure: Failure during compilation
+# Warning: OpenQASM 3 parse error
+# File: -, Line: 1, Col: 1
+# Possible loss of precision in calculating multiple-precision Pi.
+# warning: 
+# OPENQASM 3;
+# ^
+
+```
 ### Solutions to #5: The `switch` statement
 
 *[Link back to task.](#Task-5-The-switch-statement)*
