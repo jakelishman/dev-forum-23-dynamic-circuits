@@ -299,24 +299,42 @@ print(result.get_counts())
 
 #### Inspecting the transpiled circuit
 
+Details about the layout are stored on the transpiled circuit.
+This includes the initial and final mappings of virtual to physical qubits.
+These two mappings (and all intermediate states of the circuit) may not be the same, if routing (swap-mapping) was necessary to map the circuit to the target backend's topology.
+
 ```python
 print(transpiled.layout)
 ```
+
+The `target` property of backends contains the full information that the Qiskit transpiler uses to reason about the device.
+This includes both properties of the qubits themselves:
 
 ```python
 print(backend.target.qubit_properties[0])
 ```
 
+and properties of various instructions, organised by opcode (name) and the physical qubits that they are available on.
+
 ```python
 print(backend.target['sx'][(0,)])
 ```
 
+You can print out an OpenQASM 3 representation of a circuit using the Qiskit `qiskit.qasm3` module.
+The function `dumps` is the simplest entry point, which returns a string.
+
 ```python
-print(qiskit.qasm3.dumps(tqc,
-                         includes=[],
-                         disable_constants=True,
-                         basis_gates=backend.configuration().basis_gates))
+print(
+    qiskit.qasm3.dumps(
+        transpiled,
+        includes=[],
+        disable_constants=True,
+        basis_gates=backend.configuration().basis_gates,
+    )
+)
 ```
+
+
 ### Solutions to #3: If-then-else constructs
 
 *[Link back to task.](#Task-3-If-then-else constructs)*
@@ -402,18 +420,22 @@ marginal_counts(
    format_marginal=True
 ).get_counts()
 ```
+
+
 ### Solutions to #4: Improving quality of complex circuits
 
 *[Link back to task.](#Task-4-Improving-quality-of-complex-circuits)*
 
 ```python
 # From https://qiskit.org/ecosystem/ibm-provider/stubs/qiskit_ibm_provider.transpiler.passes.scheduling.html#module-qiskit_ibm_provider.transpiler.passes.scheduling
-from qiskit.transpiler.passmanager import PassManager
+from qiskit.transpiler import PassManager
 from qiskit.circuit.library import XGate
 
-from qiskit_ibm_provider.transpiler.passes.scheduling import DynamicCircuitInstructionDurations
-from qiskit_ibm_provider.transpiler.passes.scheduling import ALAPScheduleAnalysis
-from qiskit_ibm_provider.transpiler.passes.scheduling import PadDynamicalDecoupling
+from qiskit_ibm_provider.transpiler.passes.scheduling import (
+    DynamicCircuitInstructionDurations,
+    ALAPScheduleAnalysis,
+    PadDynamicalDecoupling,
+)
 
 # Use this duration class to get appropriate durations for dynamic
 # circuit backend scheduling
