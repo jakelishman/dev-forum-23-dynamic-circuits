@@ -43,6 +43,10 @@ class _wrap_backend_run:
         self._inner = inner
 
     def __call__(self, circuit, *args, dynamic=False, **kwargs):
+        # When this is properly deployed, there'll be no reason to check `_has_switch` before adding
+        # the flag in the qasm3 exporter; we can just do it every time.  While it's still a hack
+        # though, my intent was to leave the standard pathway (submit a `QuantumCircuit`) in use for
+        # most situations.
         if dynamic and isinstance(circuit, QuantumCircuit) and _has_switch(circuit):
             circuit = qasm3.dumps(
                 circuit,
