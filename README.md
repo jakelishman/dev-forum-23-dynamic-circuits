@@ -176,10 +176,18 @@ To achieve this task with Qiskit alone, you will need to use [the advanced setup
 In particular, you will need the pre-release of Qiskit Terra 0.24.0 and the helper functions provided by this repository.
 If you are familiar with using the direct submission of OpenQASM 3 strings to IBM hardware, you can use these methods too, though we would particularly appreciate feedback on the new `switch` support coming in Qiskit Terra 0.24.0.
 
-Notes to implement:
-- a circuit that needs only a single classical lookup, rather than several separate syncs
-- possible example: create some `000 + 001 + 010 + 011 + ...` state, then use a `switch` to reverse the bitstring?
-- will need to use `helpers.add_switch_support(backend)` helper defined in `lib/helpers.py` because IBM backends won't have support yet.
+A preliminary: once you have got your advanced setup installed, you need to use the helper library to upgrade your backend.
+This is just temporary; it will not be necessary once the roll-out of Terra 0.24.0 across the IBM stack is complete.
+To upgrade a backend you have already retrieved from `qiskit_ibm_provider`, you should do:
+```python
+import helpers
+
+backend = helpers.add_switch_support(backend)
+```
+You can then use `backend` like you did before, both with Qiskit's `transpile` and passing the result of that to `backend.run`.
+If you want to do more advanced debugging, you may want to examine the code of the `add_switch_support` function to see how this hack is achieved.
+
+This task is to create a bit-flip repetition circuit, using a `switch` statement to decode the syndrome measurement and apply the correction.
 
 <!--
 What we're interested in:
@@ -380,14 +388,16 @@ print(
 For a bit-flip repitition code, with a randomly introduced error:
 
 ```python
-qr_data = qk.QuantumRegister(3, 'data')
-qr_anc = qk.QuantumRegister(2, 'ancilla')
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 
-cr_rand = qk.ClassicalRegister(2, 'rand')
-cr_anc = qk.ClassicalRegister(2, 'anc')
-cr_data = qk.ClassicalRegister(3, 'out')
+qr_data = QuantumRegister(3, 'data')
+qr_anc = QuantumRegister(2, 'ancilla')
 
-qc = qk.QuantumCircuit(qr_data, qr_anc, cr_rand, cr_anc, cr_data)
+cr_rand = ClassicalRegister(2, 'rand')
+cr_anc = ClassicalRegister(2, 'anc')
+cr_data = ClassicalRegister(3, 'out')
+
+qc = QuantumCircuit(qr_data, qr_anc, cr_rand, cr_anc, cr_data)
 
 qc.h(qr_anc)
 qc.measure(qr_anc, cr_rand)
@@ -452,6 +462,7 @@ qc.measure(qr_data, cr_data)
 
 ```python
 from qiskit.result import marginal_counts
+
 marginal_counts(
    job.result(),
    [4,5,6],
