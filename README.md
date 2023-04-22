@@ -86,6 +86,8 @@ bell.measure([0, 1], [0, 1])
 
 You should be able to print out the counts from the backend run, which ideally should be mostly an even split between `'00'` and `'11`'.
 
+Dynamic circuit capabilities on IBM Hardware utilize a new system software stack, so being able to compare results from the new and legacy stacks can be a useful tool in debugging. Can you run the above against both stacks and compare their outputs?
+
 <!--
 What we're interested in:
 
@@ -100,7 +102,9 @@ What we're interested in:
 We will now run our first circuit requiring the new dynamic-circuits capabilities.
 We will create a circuit that uses a mid-circuit measurement and feed-forward control to reset a qubit.
 
+<!--
 When executing the circuit using `backend.run`, you must pass the keyword argument `dynamic=True`.
+-->
 
 1. Create a circuit with one qubit and two clbits
 2. Do a Hadamard gate on the qubit, then measure it into clbit 0.
@@ -117,6 +121,12 @@ What we're interested in:
 - how do users find the builder interface to use?
 -->
 
+Follow up questions:
+
+1. How long did it take to transpile your circuit?
+2. Which device qubits were used to execute your circuit? What are their T1/T2 times, gate and readout fidelities?
+3. What dit the transpiled circuit look like?
+4. Can you generate and print an OpenQASM3 string representing the transpiled circuit?
 
 ### Task #3: If-then-else constructs
 
