@@ -134,7 +134,7 @@ Follow up questions:
 
 ### Task #3: If-then-else constructs
 
-*[Link to hints and solutions.](#Solutions-to-3-If-then-else constructs)*
+*[Link to hints and solutions.](#Solutions-to-3-If-then-else-constructs)*
 
 In this task, we will create an approximation of a repeat-until-success circuit that returns how many iterations it took to create the desired state.
 For simplicity we will repeatedly create and measure a two-qubit state until we get the result `0b11`, at which point we will record the iteration number.
@@ -484,7 +484,7 @@ qr = QuantumRegister(2)
 iteration = QuantumRegister(2, "iteration")
 cr = ClassicalRegister(2)
 
-qc = QuantumCircuit(qr, mid, iteration)
+qc = QuantumCircuit(qr, cr, iteration)
 
 # Prepare state.
 qc.rx(3 * pi / 13, 0)
