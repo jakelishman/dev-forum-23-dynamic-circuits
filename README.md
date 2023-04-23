@@ -44,8 +44,6 @@ We are interested in pain points associated with any of these, though will likel
 
 ### Advanced users' setup
 
-:bangbang: **This will not work until Terra 0.24.0rc1 is released, scheduled for 2023-04-20.** :bangbang:
-
 If you are familiar enough with the stack to try out use of the new `switch` operation, you will need to use the prerelease version of Qiskit Terra, 0.24.0rc1 (see task 5 below).
 You will likely want to do this in a separate virtual environment.
 The prerelease of Qiskit Terra can be installed with
@@ -419,7 +417,7 @@ print(
 
 ### Solutions to #3: If-then-else constructs
 
-*[Link back to task.](#Task-3-If-then-else constructs)*
+*[Link back to task.](#Task-3-If-then-else-constructs)*
 
 #### Creating if statements in Qiskit
 
