@@ -86,7 +86,7 @@ bell.measure([0, 1], [0, 1])
 
 You should be able to print out the counts from the backend run, which ideally should be mostly an even split between `'00'` and `'11`'.
 
-Dynamic circuit capabilities on IBM Hardware utilize a new system software stack, so being able to compare results from the new and legacy stacks can be a useful tool in debugging. Can you run the above against both stacks and compare their outputs?
+Dynamic circuit capabilities on IBM Hardware utilize a new system software stack, so being able to compare results from the new and legacy stacks can be a useful tool in debugging. Run the circuit above against both stacks and compare the relative device performance.
 
 <!--
 What we're interested in:
@@ -108,7 +108,7 @@ When executing the circuit using `backend.run`, you must pass the keyword argume
 
 1. Create a circuit with one qubit and two clbits
 2. Do a Hadamard gate on the qubit, then measure it into clbit 0.
-3. If the measurement result is 1, apply an X gate on the qubit.
+3. Add a runtime check that, if the measurement result is 1, will apply an X gate on the qubit.
 4. Measure the qubit again, into clbit 1.
 5. Execute the circuit on the backend and retrieve the counts.
 
@@ -466,7 +466,7 @@ You could record the iteration count by hardcoding the relevant `x` flips on the
 #### I'm not getting my iteration count back!
 
 If all the measurements into a clbit are conditional, you might not see this clbit in the returned values from the IBM backends (but come to the "Rethinking dynamic circuits IO" working session to learn more!).
-If this is the case, you might need conditionally prepare two special "iteration counter" qubits, and unconditionally measure them at the end.
+If this is the case, you might need to conditionally prepare two special "iteration counter" qubits, and unconditionally measure them at the end.
 
 
 #### Example implementation
@@ -549,13 +549,6 @@ pm = PassManager(
 )
 
 scheduled = pm.run(transpiled_circuit)
-# qss_compiler.compile.QSSCompilationFailure: Failure during compilation
-# Warning: OpenQASM 3 parse error
-# File: -, Line: 1, Col: 1
-# Possible loss of precision in calculating multiple-precision Pi.
-# warning: 
-# OPENQASM 3;
-# ^
 ```
 
 
